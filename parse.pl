@@ -12,10 +12,18 @@ sub tokens {
     my $input = shift;
     return sub {
         TOKEN: {
-            return ['open-paren']  if $input =~ /\G \( /gcx;
-            return ['close-paren'] if $input =~ /\G \) /gcx;
-            redo TOKEN if $input =~ /\G \s+ /gcx;
-            return ['symbol', $1] if $input =~ /\G ([^() ]+) /gcx;
+            if ($input =~ /\G \( /gcx) {
+                return ['open-paren']
+            }
+            if ($input =~ /\G \) /gcx) {
+                return ['close-paren']
+            }
+            if ($input =~ /\G \s+ /gcx) {
+                redo TOKEN
+            }
+            if ($input =~ /\G ([^() ]+) /gcx) {
+                return ['symbol', $1]
+            }
             return;
         }
     }
