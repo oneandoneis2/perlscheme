@@ -24,6 +24,26 @@ use Parse;
 }
 
 {
+    my $tokens = Parse::tokens('123');
+    is_deeply( $tokens->(), ['number', 123], 'Got number');
+}
+
+{
+    my $tokens = Parse::tokens('-123');
+    is_deeply( $tokens->(), ['number', -123], 'Got number');
+}
+
+{
+    my $tokens = Parse::tokens('123.45');
+    is_deeply( $tokens->(), ['number', 123.45], 'Got number');
+}
+
+{
+    my $tokens = Parse::tokens('-123.45');
+    is_deeply( $tokens->(), ['number', -123.45], 'Got number');
+}
+
+{
     my $tokens = Parse::tokens('(   ))');
     is_deeply( $tokens->(), ['open-paren'], 'Parsed first paren');
     is_deeply( $tokens->(), ['close-paren'], 'Parsed first close-paren');
@@ -41,7 +61,7 @@ use Parse;
 }
 
 {
-    my $tokens = Parse::tokens('(a (complex "string" "and \"symbol\""   test))');
+    my $tokens = Parse::tokens('(a (complex "string" "and \"symbol\""   test 12 -13))');
     is_deeply( $tokens->(), ['open-paren'], 'Got first paren');
     is_deeply( $tokens->(), ['symbol', 'a'], 'Got first symbol');
     is_deeply( $tokens->(), ['open-paren'], 'Got second paren');
@@ -49,6 +69,8 @@ use Parse;
     is_deeply( $tokens->(), ['string', 'string'], 'Got first string');
     is_deeply( $tokens->(), ['string', 'and "symbol"'], 'Got second string');
     is_deeply( $tokens->(), ['symbol', 'test'], 'Got third symbol');
+    is_deeply( $tokens->(), ['number',12], 'Got first number');
+    is_deeply( $tokens->(), ['number',-13], 'Got second number');
     is_deeply( $tokens->(), ['close-paren'], 'Got first close-paren');
     is_deeply( $tokens->(), ['close-paren'], 'Got second close-paren');
 }

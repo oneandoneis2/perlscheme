@@ -51,6 +51,9 @@ sub tokens {
             if ($input =~ /\G \s+ /gcx) {
                 redo TOKEN
             }
+            if ($input =~ /\G (-?\d+(\.\d+)?) /gcx) {
+                return ['number', $1]
+            }
             if ($input =~ /\G ([^"() ]+) /gcx) {
                 return ['symbol', $1]
             }
