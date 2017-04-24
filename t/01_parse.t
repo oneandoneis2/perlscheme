@@ -75,4 +75,16 @@ use Parse;
     is_deeply( $tokens->(), ['close-paren'], 'Got second close-paren');
 }
 
+{
+    my $tokens = Parse::tokens('(first s-expression)(second');
+    is_deeply( $tokens->('s-expression'), ['open-paren'], 'Got first paren');
+    is_deeply( $tokens->(')'), ['symbol','first'], 'Got first symbol');
+    is_deeply( $tokens->(), ['symbol','s-expression'], 'Got second symbol');
+    is_deeply( $tokens->(), ['close-paren'], 'Got first close-paren');
+    is_deeply( $tokens->(), ['open-paren'], 'Got second paren');
+    is_deeply( $tokens->(), ['symbol','second'], 'Got first symbol of second sexpr');
+    is_deeply( $tokens->(), ['symbol','s-expression'], 'Got second symbol of second sexpr');
+    is_deeply( $tokens->(), ['close-paren'], 'Got second close-paren');
+}
+
 done_testing();

@@ -5,12 +5,26 @@ use warnings;
 
 sub tokens {
     my $input = shift;
+    my $next_input = '';
     my $building_string = 0;
     my $string_escape = 0;
     my $string = '';
     return sub {
+        # Accept new input if supplied
+        my $new_input = shift;
+        $next_input .= ' ' . $new_input if $new_input;
+
+        # Having sorted the input, start tokenising
         TOKEN: {
-          if ($building_string) {
+          # If original input is exhausted, use new input if we have any
+          if ($input =~ /\G$/gcx && $next_input) {
+              $input = $next_input;
+              $next_input = '';
+              redo TOKEN
+          }
+
+          # We have input to work with, are we building a string?
+          elsif ($building_string) {
             if ($input =~ /\G " /gcx) {
                 if ($string_escape) {
                     $string .= '"';
@@ -37,6 +51,7 @@ sub tokens {
                 redo TOKEN
             }
           }
+          # Not building a string, must be symbols!
           else {
             if ($input =~ /\G \( /gcx) {
                 return ['open-paren']
