@@ -78,4 +78,14 @@ sub tokens {
     }
 }
 
+sub is_symbol { my $token = shift; return $token->[0] eq 'symbol' }
+sub is_string { my $token = shift; return $token->[0] eq 'string' }
+sub is_number { my $token = shift; return $token->[0] eq 'number' }
+sub is_atom {
+    my $token = shift;
+    return ( is_symbol($token)
+        || is_string($token)
+        || is_number($token))
+}
+
 1;
