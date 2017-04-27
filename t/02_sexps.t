@@ -7,10 +7,20 @@ use Test::More;
 use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Indent = 1;
-$Data::Dumper::Maxdepth = 2;
 
 use lib 'lib';
 use Parse;
+
+# Primitive conversion from stream of symbols to array
+# "Read" will do this properly but this is good neough for the tests
+sub make_sexpr {
+    my $tokens = shift;
+    my $sexp = [];
+    while (my $token = $tokens->()) {
+        push @$sexp, $token;
+    }
+    return $sexp;
+}
 
 {
     my $tokens = Parse::tokens('a_symbol');
@@ -43,6 +53,55 @@ use Parse;
     ok( Parse::is_atom($tokens->('(')), "Correctly handled string as atom" );
     ok( !Parse::is_atom($tokens->(')')), "Correctly handled open-paren as atom" );
     ok( !Parse::is_atom($tokens->()), "Correctly handled close-paren as atom" );
+}
+
+{
+    my $tokens = Parse::tokens('foo');
+    my $sexpr  = make_sexpr($tokens);
+    my $ast = Parse::build_s($sexpr);
+    is_deeply( $ast, ['symbol','foo'], 'Built single list');
+}
+
+{
+    my $tokens = Parse::tokens('(foo bar baz)');
+    my $sexpr  = make_sexpr($tokens);
+    my $ast = Parse::build_s($sexpr);
+    is_deeply( $ast, [['symbol','foo'],['symbol','bar'],['symbol','baz']], 'Built bigger list');
+}
+
+{
+    my $tokens = Parse::tokens('(foo)');
+    my $sexpr  = make_sexpr($tokens);
+    my $ast = Parse::build_s($sexpr);
+    is_deeply( $ast, [['symbol','foo']], 'Built simple symbol');
+}
+
+{
+    my $tokens = Parse::tokens('(foo (bar) baz)');
+    my $sexpr  = make_sexpr($tokens);
+    my $ast = Parse::build_s($sexpr);
+    is_deeply( $ast, [['symbol','foo'],[['symbol','bar']],['symbol','baz']], 'Built nested list');
+}
+
+{
+    my $tokens = Parse::tokens('(one (two (3 4 "5") "six") (seven))');
+    my $sexpr  = make_sexpr($tokens);
+    my $ast = Parse::build_s($sexpr);
+    is_deeply( $ast, [
+        ['symbol','one'],
+        [
+            ['symbol','two'],
+            [
+                ['number', 3],
+                ['number', 4],
+                ['string', "5"]
+            ],
+            ['string','six']
+        ],
+        [
+            ['symbol','seven']
+        ]
+    ], 'Built nested list');
 }
 
 done_testing();
