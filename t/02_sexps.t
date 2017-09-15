@@ -56,10 +56,10 @@ sub make_sexpr {
 }
 
 {
-    my $tokens = Parse::tokens('foo');
+    my $tokens = Parse::tokens('(foo)');
     my $sexpr  = make_sexpr($tokens);
     my $ast = Parse::build_s($sexpr);
-    is_deeply( $ast, ['symbol','foo'], 'Built single list');
+    is_deeply( $ast, [['symbol','foo']], 'Built single list');
 }
 
 {
